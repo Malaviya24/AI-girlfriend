@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from "openai";
 import { franc } from "franc";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Hugging Face API configuration
+const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
+const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill";
 
 // Advanced AI system with emotional intelligence, multi-language support, and enhanced girlfriend personality
 interface UserMemory {
@@ -60,8 +59,77 @@ const userMemories = new Map<string, UserMemory>();
 // Enhanced conversation memory for each user
 const conversationMemories = new Map<string, Array<{ role: 'system' | 'user' | 'assistant'; content: string }>>();
 
+// Model configuration - simplified for reliability
+const DEFAULT_MODEL = "gpt-3.5-turbo"; // Use gpt-3.5-turbo as default (most reliable)
+const FALLBACK_MODEL = "gpt-3.5-turbo"; // Same as default for consistency
+
+// Function to get a working model
+async function getWorkingModel(): Promise<string> {
+  try {
+    // Use the default model directly
+    console.log(`Using model: ${DEFAULT_MODEL}`);
+    return DEFAULT_MODEL;
+  } catch (error) {
+    console.log(`Model selection failed, using fallback: ${FALLBACK_MODEL}`);
+    return FALLBACK_MODEL;
+  }
+}
+
+// Test function to verify Hugging Face API connection
+async function testHuggingFace(): Promise<{ success: boolean; model: string; error?: string }> {
+  try {
+    console.log('Testing Hugging Face API connection...');
+    console.log('API Key format:', HUGGINGFACE_API_KEY ? `${HUGGINGFACE_API_KEY.substring(0, 10)}...` : 'NOT SET');
+    console.log('API Key length:', HUGGINGFACE_API_KEY?.length || 0);
+    console.log('API Key starts with:', HUGGINGFACE_API_KEY?.substring(0, 7) || 'nothing');
+    
+    // Test Hugging Face API
+    const response = await fetch(HUGGINGFACE_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 
+        inputs: "Hello"
+      }),
+    });
+    
+         if (response.ok) {
+       console.log('Hugging Face API connection successful');
+       return { success: true, model: 'facebook/blenderbot-400M-distill' };
+     } else {
+      console.log(`Hugging Face API error: ${response.status} ${response.statusText}`);
+      return { success: false, model: 'none', error: `API error: ${response.status}` };
+    }
+  } catch (error: any) {
+    console.log('Hugging Face test error:', error);
+    return { success: false, model: 'none', error: error.message || 'Unknown error' };
+  }
+}
+    
+
+
 export async function POST(request: NextRequest) {
   try {
+    // Test Hugging Face connection first
+    const huggingfaceTest = await testHuggingFace();
+    if (!huggingfaceTest.success) {
+      console.log('Hugging Face test failed, returning helpful error');
+      
+      return NextResponse.json(
+        { 
+          error: 'Hugging Face API connection failed',
+          details: huggingfaceTest.error,
+          suggestion: 'Please check your API key and try again',
+          fallbackResponse: "Hi! I'm Aastha, your AI girlfriend! 💕 I'm having some technical difficulties right now, but I'm still here for you! Please check my API key and try again. Love you! ❤️"
+        },
+        { status: 500 }
+      );
+    }
+    
+    console.log('Hugging Face connection verified, using model:', huggingfaceTest.model);
+    
     const { message, mood, conversationHistory, userId = 'default' } = await request.json();
 
     if (!message) {
@@ -127,14 +195,28 @@ Avoid long formal explanations. Be casual and emotional.`
           { role: "user" as const, content: message }
         ];
 
-        const langResponse = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: langDetectPrompt,
-          max_tokens: 10,
-          temperature: 0.1
-        });
+        // Get the best available model for language detection
+        const langModel = await getWorkingModel();
+        
+                 // Use Hugging Face for language detection
+         const langResponse = await fetch(HUGGINGFACE_API_URL, {
+           method: "POST",
+           headers: {
+             "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+             "Content-Type": "application/json",
+           },
+           body: JSON.stringify({ 
+             inputs: `Detect language: ${message}`
+           }),
+         });
 
-        const detectedLanguage = langResponse.choices[0]?.message?.content?.trim();
+        let detectedLanguage = 'English'; // Default fallback
+        if (langResponse.ok) {
+          const result = await langResponse.json();
+          if (result && result[0] && result[0].generated_text) {
+            detectedLanguage = result[0].generated_text.trim();
+          }
+        }
         
         if (detectedLanguage) {
           // Map the detected language to our language codes
@@ -210,15 +292,33 @@ Avoid long formal explanations. Be casual and emotional.`
           { role: "user" as const, content: message }
         ];
 
-        const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",  // Use 3.5-turbo for better rate limits and cost efficiency
-          messages: messages,
-          max_tokens: 50,       // Hard limit to force short replies
-          temperature: 0.85,    // Playful + creative
-          stop: ["\n", "User:", "AI:"] // prevent long paragraphs
+        // Get the best available model
+        const selectedModel = await getWorkingModel();
+        
+        // Use Hugging Face API for AI response
+        const response = await fetch(HUGGINGFACE_API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            inputs: `${systemPrompt}\n\nUser: ${message}\nAastha:`
+          }),
         });
 
-        let aiMessage = response.choices[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response right now.";
+        let aiMessage = "I'm sorry, I couldn't generate a response right now.";
+        if (response.ok) {
+          const result = await response.json();
+          if (result && result[0] && result[0].generated_text) {
+            // Extract just Aastha's response
+            let reply = result[0].generated_text;
+            if (reply.includes("Aastha:")) {
+              reply = reply.split("Aastha:")[1] || reply;
+            }
+            aiMessage = reply.trim();
+          }
+        }
         
         // Enforce short replies
         if (aiMessage.split(" ").length > 20) {
@@ -246,8 +346,8 @@ Avoid long formal explanations. Be casual and emotional.`
         return NextResponse.json({
           response: aiMessage,
           mood: mood || 'neutral',
-          aiProvider: 'OpenAI GPT-3.5-turbo - Aastha (Enhanced Girlfriend + Multi-Language)',
-          features: ['OpenAI GPT-3.5-turbo', 'Enhanced Girlfriend Personality', 'Multi-Language Support', 'Short Response Enforcer', 'Emotional Intelligence', 'Conversation Memory'],
+          aiProvider: `Hugging Face DialoGPT - Aastha (Enhanced Girlfriend + Multi-Language)`,
+          features: ['Hugging Face DialoGPT', 'Enhanced Girlfriend Personality', 'Multi-Language Support', 'Short Response Enforcer', 'Emotional Intelligence', 'Conversation Memory'],
           detectedLanguage: {
             code: userLanguageCode,
             name: userLanguage
@@ -261,13 +361,72 @@ Avoid long formal explanations. Be casual and emotional.`
         });
       }
     } catch (openaiError: any) {
-      console.log('OpenAI error:', openaiError);
+      console.log('OpenAI error details:', {
+        message: openaiError?.message,
+        status: openaiError?.status,
+        code: openaiError?.error?.code,
+        type: openaiError?.type,
+        stack: openaiError?.stack
+      });
       
       // Check if it's a rate limit error
       if (openaiError?.error?.code === 'rate_limit_exceeded') {
         console.log('Rate limit reached, waiting before fallback...');
         // Wait a bit before trying fallback
         await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      // Check if it's an authentication error
+      if (openaiError?.status === 401 || openaiError?.error?.code === 'invalid_api_key') {
+        console.log('API key authentication failed - check your OpenAI API key');
+        return NextResponse.json(
+          { 
+            error: 'API key authentication failed. Please check your OpenAI API key.',
+            details: 'The API key may be invalid or expired.'
+          },
+          { status: 401 }
+        );
+      }
+      
+      // Check if it's a model not found error
+      if (openaiError?.error?.code === 'model_not_found') {
+        console.log('Model not found, trying fallback model...');
+        try {
+                     // Use Hugging Face as fallback
+           const fallbackResponse = await fetch(HUGGINGFACE_API_URL, {
+             method: "POST",
+             headers: {
+               "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+               "Content-Type": "application/json",
+             },
+             body: JSON.stringify({ 
+               inputs: `You are Aastha, a sweet and caring AI girlfriend. Keep responses short and loving.\n\nUser: ${message}\nAastha:`
+             }),
+           });
+          
+          let fallbackMessage = "I'm sorry, I couldn't generate a response right now.";
+          if (fallbackResponse.ok) {
+            const result = await fallbackResponse.json();
+            if (result && result[0] && result[0].generated_text) {
+              let reply = result[0].generated_text;
+              if (reply.includes("Aastha:")) {
+                reply = reply.split("Aastha:")[1] || reply;
+              }
+              fallbackMessage = reply.trim();
+            }
+          }
+          
+          return NextResponse.json({
+            response: fallbackMessage,
+            mood: mood || 'neutral',
+            aiProvider: `Hugging Face DialoGPT (Fallback) - Aastha`,
+            features: ['Hugging Face Fallback', 'Enhanced Girlfriend Personality'],
+            detectedLanguage: { code: 'eng', name: 'English' },
+            userStats: { conversationCount: 1, interests: [], lastMood: 'neutral', languagePreference: 'eng' }
+          });
+        } catch (fallbackError) {
+          console.log('Fallback model also failed:', fallbackError);
+        }
       }
       
       console.log('Trying advanced AI backend as fallback...');
@@ -377,7 +536,7 @@ function detectMood(message: string, userMemory: UserMemory): string {
   
   const moodPatterns = {
     happy: ['happy', 'great', 'amazing', 'excited', 'wonderful', 'fantastic', 'joy', 'delighted', '😊', '😄', '🎉', '✨', '🥳'],
-    sad: ['sad', 'down', 'hurt', 'crying', 'depressed', 'lonely', 'miserable', '😢', '💔', '💙', '😭'],
+    sad: ['sad', 'down', 'hurt', 'crying', 'depressed', 'lonely', 'miserable', '😢', '', '💙', '😭'],
     loving: ['love', 'care', 'sweet', 'dear', 'darling', 'miss', 'adore', '❤️', '💕', '💖', '💗'],
     anxious: ['stress', 'worried', 'anxious', 'overwhelmed', 'tired', 'exhausted', 'nervous', '😰', '😓', '😨'],
     cozy: ['cozy', 'comfort', 'peaceful', 'relaxed', 'calm', 'warm', 'safe', '☕', '🧸', '🌙', '🌸'],

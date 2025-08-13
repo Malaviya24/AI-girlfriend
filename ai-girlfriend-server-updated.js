@@ -8,11 +8,24 @@ import fs from "fs";
 import dotenv from "dotenv";
 import cors from "cors";
 import fetch from "node-fetch";
+import path from "path";
+import { fileURLToPath } from 'url';
 
-dotenv.config();
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
-if (!OPENAI_KEY) {
-  console.error("Please set OPENAI_API_KEY in .env");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env file from the same directory as this script
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+console.log('Current directory:', __dirname);
+console.log('Looking for .env file at:', path.join(__dirname, '.env'));
+console.log('Environment variables loaded:', Object.keys(process.env).filter(key => key.includes('HUGGINGFACE')));
+
+const HUGGINGFACE_KEY = process.env.HUGGINGFACE_API_KEY;
+if (!HUGGINGFACE_KEY) {
+  console.error("Please set HUGGINGFACE_API_KEY in .env");
+  console.error("Current working directory:", process.cwd());
+  console.error("Available env vars:", Object.keys(process.env));
   process.exit(1);
 }
 
@@ -60,6 +73,45 @@ const RANDOM_PROMOTE_PROB = 0.12;
 const VANISH_THRESHOLD_MS = 1000 * 60 * 30;
 const CHECK_INTERVAL_MS = 60_000;
 const PRUNE_INTERVAL_MS = 60_000;
+
+// ---------- Hugging Face AI Function ----------
+async function getHuggingFaceResponse(message, userId) {
+  try {
+    console.log(`Getting AI response for user ${userId}: ${message}`);
+    
+         const response = await fetch(
+       "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
+       {
+         method: "POST",
+         headers: {
+           "Authorization": `Bearer ${HUGGINGFACE_KEY}`,
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ 
+           inputs: `You are Aastha, a caring AI girlfriend. Respond to: ${message}`
+         }),
+       }
+     );
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`Hugging Face response:`, result);
+      
+      if (result && result[0] && result[0].generated_text) {
+        return result[0].generated_text;
+      } else {
+        console.log("Unexpected response format:", result);
+        return "I'm having trouble thinking right now. Can you try again?";
+      }
+    } else {
+      console.log(`Hugging Face API error: ${response.status} ${response.statusText}`);
+      return "I'm having technical difficulties. Please try again.";
+    }
+  } catch (error) {
+    console.log("Hugging Face error:", error.message);
+    return "I'm having trouble connecting right now. Can you try again?";
+  }
+}
 
 // ---------- Utilities ----------
 function nowMs(){ return Date.now(); }
@@ -200,19 +252,65 @@ function pushShortTerm(userId, role, content){
 }
 function getShortTerm(userId){ ensureUser(userId); return conversationShortTerm[userId]||[]; }
 
-// ---------- OpenAI helper ----------
+// ---------- Hugging Face AI helper ----------
 async function generateChatReply(messages, maxTokens=400, temperature=0.9){
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {"Content-Type":"application/json","Authorization":`Bearer ${OPENAI_KEY}`},
-    body: JSON.stringify({ model: "gpt-4o-mini", messages, max_tokens: maxTokens, temperature })
-  });
-  const j = await res.json();
-  if (!j.choices || !j.choices[0] || !j.choices[0].message) {
-    console.error("OpenAI error:", j);
-    return "Sorry, I couldn't think of a reply right now.";
+  try {
+    // Get the last user message
+    const lastUserMessage = messages[messages.length - 1]?.content || "";
+    
+    // Build context from system messages and conversation history
+    let context = "";
+    for (const msg of messages) {
+      if (msg.role === "system") {
+        context += msg.content + "\n\n";
+      }
+    }
+    
+    // Add conversation context (last few messages)
+    const conversationMessages = messages.filter(m => m.role !== "system").slice(-4);
+    for (const msg of conversationMessages) {
+      context += `${msg.role === "user" ? "You" : "Aastha"}: ${msg.content}\n`;
+    }
+    
+         // Use Hugging Face API
+     const response = await fetch(
+       "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",
+       {
+         method: "POST",
+         headers: {
+           "Authorization": `Bearer ${HUGGINGFACE_KEY}`,
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({ 
+           inputs: `${context}\nAastha:`
+         }),
+       }
+     );
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`Hugging Face response:`, result);
+      
+      if (result && result[0] && result[0].generated_text) {
+        // Extract just the new response part
+        let reply = result[0].generated_text;
+        // Remove the input context and keep only Aastha's response
+        if (reply.includes("Aastha:")) {
+          reply = reply.split("Aastha:")[1] || reply;
+        }
+        return reply.trim() || "I'm here for you! ❤️";
+      } else {
+        console.log("Unexpected response format:", result);
+        return "I'm having trouble thinking right now. Can you try again?";
+      }
+    } else {
+      console.log(`Hugging Face API error: ${response.status} ${response.statusText}`);
+      return "I'm having technical difficulties. Please try again.";
+    }
+  } catch (error) {
+    console.log("Hugging Face error:", error.message);
+    return "I'm having trouble connecting right now. Can you try again?";
   }
-  return j.choices[0].message.content;
 }
 
 // ---------- Persona prompt ----------
