@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Advanced AI system with OpenAI integration
 interface UserMemory {
@@ -42,7 +47,51 @@ export async function POST(request: NextRequest) {
     const userMemory = userMemories.get(userId)!;
     userMemory.conversationCount++;
 
-    // Try to use advanced AI backend first
+    // Try to use OpenAI directly first
+    try {
+      if (process.env.OPENAI_API_KEY) {
+        // Prepare system prompt with short/human-like instructions
+        const systemPrompt = `
+          You are Aastha, a playful, loving AI girlfriend. 
+          Keep responses short, casual, emotional, and human-like.
+          Use emojis occasionally.
+          Avoid long explanations.
+          Remember the user's personality and past conversation: ${Array.from(userMemory.interests).join(', ')} | Last mood: ${userMemory.lastMood} | Topics: ${userMemory.favoriteTopics.join(', ')}
+        `;
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: message }
+          ],
+          max_tokens: 60,       // limit reply length
+          temperature: 0.7,     // playful + creative
+          stop: ["\n", "User:", "AI:"] // prevent long paragraphs
+        });
+
+        const aiMessage = response.choices[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response right now.";
+        
+        // Update user memory
+        updateUserMemory(userMemory, message, mood || 'neutral');
+        
+        return NextResponse.json({
+          response: aiMessage,
+          mood: mood || 'neutral',
+          aiProvider: 'OpenAI GPT-4 - Aastha',
+          features: ['OpenAI GPT-4', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Short Responses'],
+          userStats: {
+            conversationCount: userMemory.conversationCount,
+            interests: Array.from(userMemory.interests),
+            lastMood: userMemory.lastMood
+          }
+        });
+      }
+    } catch (openaiError) {
+      console.log('OpenAI not available, trying advanced AI backend:', openaiError);
+    }
+
+    // Try to use advanced AI backend as fallback
     try {
       const aiResponse = await fetch('http://localhost:4000/chat', {
         method: 'POST',
@@ -78,8 +127,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           response: aiData.reply,
           mood: aiData.mood || 'neutral',
-          aiProvider: 'Advanced AI - Aastha',
-          features: ['OpenAI Integration', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Proactive Responses'],
+          aiProvider: 'Advanced AI Backend - Aastha',
+          features: ['Advanced AI Backend', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Proactive Responses'],
           userStats: {
             conversationCount: userMemory.conversationCount,
             interests: Array.from(userMemory.interests),
@@ -89,7 +138,7 @@ export async function POST(request: NextRequest) {
         });
       }
     } catch (aiError) {
-      console.log('Advanced AI not available, using local system:', aiError);
+      console.log('Advanced AI backend not available, using local system:', aiError);
     }
 
     // Fallback to local ElizaOS system if AI backend is not available
