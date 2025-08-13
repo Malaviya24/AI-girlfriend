@@ -612,8 +612,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
 
       {/* AI Intelligence Panel Modal */}
       <AnimatePresence>
@@ -622,282 +621,286 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4"
-            onClick={() => setShowAiPanel(false)}
+            className="fixed inset-0 z-[60] flex items-start justify-center p-2 sm:p-4"
+            style={{ 
+              paddingTop: '120px', // Extra top padding to avoid top bar
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain'
+            }}
           >
             {/* Blurred Background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 backdrop-blur-md"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-blue-50 backdrop-blur-md"></div>
+            
+            {/* Modal Container */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative z-10"
+              initial={{ scale: 0.9, opacity: 0, y: -20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: -20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
+              className="relative z-10 w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
               style={{ 
-                WebkitOverflowScrolling: 'touch',
-                overscrollBehavior: 'contain'
+                marginTop: '20px', // Additional margin from top
+                marginBottom: '20px' // Bottom margin for better spacing
               }}
             >
-              <div className="p-4 sm:p-6 border-b border-gray-200">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-purple-500 to-blue-600 p-4 sm:p-6 relative">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 sm:space-x-3">
-                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800">AI Intelligence Panel</h3>
-                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center">
+                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+                    AI Intelligence Panel
+                  </h2>
                   <button
                     onClick={() => setShowAiPanel(false)}
-                    className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors touch-manipulation"
+                    className="absolute top-4 right-4 sm:top-6 sm:right-6 w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 text-white hover:text-gray-100 active:bg-gray-200 touch-manipulation"
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
-                    <X className="w-5 h-5 text-gray-600" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
-              
-              <div className="p-3 sm:p-4 lg:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                  {/* AI Status & Bond */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
-                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
-                        AI Status
-                      </h4>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Current Mood:</span>
-                          <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-medium">
-                            {aiStatus.mood || 'happy'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Bond Level:</span>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-800">
-                            {Math.round(aiStatus.bond || 0)}/100
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${Math.min(100, Math.max(0, aiStatus.bond || 0))}%` }}
-                          />
-                        </div>
-                      </div>
-                      <button
-                        onClick={fetchAiStatus}
-                        className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
-                      >
-                        Refresh Status
-                      </button>
-                    </div>
 
-                    {/* Personality Settings */}
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Personality Settings</h4>
-                      <div className="space-y-3 sm:space-y-4">
-                        {["playfulness", "romantic", "talkative", "caring"].map((trait) => (
-                          <div key={trait} className="space-y-2">
-                            <div className="flex justify-between text-xs sm:text-sm">
-                              <span className="capitalize font-medium text-gray-700">{trait}</span>
-                              <span className="text-gray-600">
-                                {Math.round(((aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6) * 100)}%
-                              </span>
-                            </div>
-                            <div className="relative">
-                              <input
-                                type="range"
-                                min="0" 
-                                max="1" 
-                                step="0.05"
-                                value={(aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6}
-                                onChange={e => updateAiPersonality(trait, parseFloat(e.target.value))}
-                                className="w-full h-3 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider touch-manipulation"
-                                style={{ 
-                                  WebkitAppearance: 'none',
-                                  WebkitTapHighlightColor: 'transparent',
-                                  touchAction: 'manipulation'
-                                }}
-                              />
-                              <style jsx>{`
+              {/* Scrollable Content Area */}
+              <div className="overflow-y-auto max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-120px)] p-4 sm:p-6">
+                <div className="space-y-4 sm:space-y-6">
+                  {/* AI Status & Bond */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-lg border">
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                      <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+                      AI Status
+                    </h4>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">Current Mood:</span>
+                        <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-medium">
+                          {aiStatus.mood || 'happy'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">Bond Level:</span>
+                        <span className="text-xs sm:text-sm font-semibold text-gray-800">
+                          {Math.round(aiStatus.bond || 0)}/100
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${Math.min(100, Math.max(0, aiStatus.bond || 0))}%` }}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={fetchAiStatus}
+                      className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      Refresh Status
+                    </button>
+                  </div>
+
+                  {/* Personality Settings */}
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 sm:p-4 rounded-lg border">
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Personality Settings</h4>
+                    <div className="space-y-3 sm:space-y-4">
+                      {["playfulness", "romantic", "talkative", "caring"].map((trait) => (
+                        <div key={trait} className="space-y-2">
+                          <div className="flex justify-between text-xs sm:text-sm">
+                            <span className="capitalize font-medium text-gray-700">{trait}</span>
+                            <span className="text-gray-600">
+                              {Math.round(((aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6) * 100)}%
+                            </span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="0" 
+                              max="1" 
+                              step="0.05"
+                              value={(aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6}
+                              onChange={e => updateAiPersonality(trait, parseFloat(e.target.value))}
+                              className="w-full h-3 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider touch-manipulation"
+                              style={{ 
+                                WebkitAppearance: 'none',
+                                WebkitTapHighlightColor: 'transparent',
+                                touchAction: 'manipulation'
+                              }}
+                            />
+                            <style jsx>{`
+                              .slider::-webkit-slider-thumb {
+                                -webkit-appearance: none;
+                                appearance: none;
+                                width: 20px;
+                                height: 20px;
+                                border-radius: 50%;
+                                background: #8b5cf6;
+                                cursor: pointer;
+                                border: 2px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                              }
+                              .slider::-moz-range-thumb {
+                                width: 20px;
+                                height: 20px;
+                                border-radius: 50%;
+                                background: #8b5cf6;
+                                cursor: pointer;
+                                border: 2px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                              }
+                              @media (max-width: 640px) {
                                 .slider::-webkit-slider-thumb {
-                                  -webkit-appearance: none;
-                                  appearance: none;
-                                  width: 20px;
-                                  height: 20px;
-                                  border-radius: 50%;
-                                  background: #8b5cf6;
-                                  cursor: pointer;
-                                  border: 2px solid white;
-                                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                  width: 24px;
+                                  height: 24px;
                                 }
                                 .slider::-moz-range-thumb {
-                                  width: 20px;
-                                  height: 20px;
-                                  border-radius: 50%;
-                                  background: #8b5cf6;
-                                  cursor: pointer;
-                                  border: 2px solid white;
-                                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                  width: 24px;
+                                  height: 24px;
                                 }
-                                @media (max-width: 640px) {
-                                  .slider::-webkit-slider-thumb {
-                                    width: 24px;
-                                    height: 24px;
-                                  }
-                                  .slider::-moz-range-thumb {
-                                    width: 24px;
-                                    height: 24px;
-                                  }
-                                }
-                              `}</style>
-                            </div>
+                              }
+                            `}</style>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
                   {/* AI Memories */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
-                        <MemoryStick className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
-                        AI Memories
-                      </h4>
-                      
-                      <div className="space-y-3 sm:space-y-4">
-                        {/* Permanent Memories */}
-                        <div>
-                          <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Permanent Memories</h5>
-                          <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
-                            {aiMemories.permanent && aiMemories.permanent.length > 0 ? (
-                              aiMemories.permanent.slice(-3).map((mem: any) => (
-                                <div key={mem.id} className="text-xs bg-white p-2 rounded border">
-                                  <div className="text-gray-800">{mem.text}</div>
-                                  <div className="text-gray-500 text-xs mt-1">
-                                    {mem.date} • mood: {mem.mood}
-                                  </div>
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
+                    <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                      <MemoryStick className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
+                      AI Memories
+                    </h4>
+                    
+                    <div className="space-y-3 sm:space-y-4">
+                      {/* Permanent Memories */}
+                      <div>
+                        <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Permanent Memories</h5>
+                        <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
+                          {aiMemories.permanent && aiMemories.permanent.length > 0 ? (
+                            aiMemories.permanent.slice(-3).map((mem: any) => (
+                              <div key={mem.id} className="text-xs bg-white p-2 rounded border">
+                                <div className="text-gray-800">{mem.text}</div>
+                                <div className="text-gray-500 text-xs mt-1">
+                                  {mem.date} • mood: {mem.mood}
                                 </div>
-                              ))
-                            ) : (
-                              <div className="text-gray-500 text-xs">No permanent memories yet</div>
-                            )}
-                          </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-gray-500 text-xs">No permanent memories yet</div>
+                          )}
                         </div>
+                      </div>
 
-                        {/* Temporary Memories */}
-                        <div>
-                          <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Recent Memories</h5>
-                          <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
-                            {aiMemories.temporary && aiMemories.temporary.length > 0 ? (
-                              aiMemories.temporary.slice(-3).map((mem: any) => (
-                                <div key={mem.id} className="text-xs bg-white p-2 rounded border">
-                                  <div className="text-gray-800">{mem.text}</div>
-                                  <div className="text-gray-500 text-xs mt-1">
-                                    {mem.date} • mood: {mem.mood}
-                                  </div>
+                      {/* Temporary Memories */}
+                      <div>
+                        <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Recent Memories</h5>
+                        <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
+                          {aiMemories.temporary && aiMemories.temporary.length > 0 ? (
+                            aiMemories.temporary.slice(-3).map((mem: any) => (
+                              <div key={mem.id} className="text-xs bg-white p-2 rounded border">
+                                <div className="text-gray-800">{mem.text}</div>
+                                <div className="text-gray-500 text-xs mt-1">
+                                  {mem.date} • mood: {mem.mood}
                                 </div>
-                              ))
-                            ) : (
-                              <div className="text-gray-500 text-xs">No recent memories</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <button
-                        onClick={fetchAiMemories}
-                        className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
-                      >
-                        Refresh Memories
-                      </button>
-                    </div>
-
-                    {/* Emotional Intelligence */}
-                    <div className="bg-gradient-to-r from-pink-50 to-red-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
-                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-pink-600" />
-                        Emotional Intelligence
-                      </h4>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Your Current Mood:</span>
-                          <span className="px-2 sm:px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-xs sm:text-sm font-medium capitalize">
-                            {userEmotion.primary}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Emotional Intensity:</span>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-800">
-                            {userEmotion.intensity}/10
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full transition-all duration-300"
-                            style={{ width: `${(userEmotion.intensity / 10) * 100}%` }}
-                          />
-                        </div>
-                        {userEmotion.secondary.length > 0 && (
-                          <div className="text-xs text-gray-600">
-                            Also detected: {userEmotion.secondary.join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Language Detection */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
-                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-indigo-600" />
-                        Language Detection
-                      </h4>
-                      <div className="space-y-2 sm:space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Detected Language:</span>
-                          <span className="px-2 sm:px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs sm:text-sm font-medium">
-                            {userLanguage.name}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs sm:text-sm font-medium text-gray-700">Language Code:</span>
-                          <span className="text-xs sm:text-sm font-semibold text-gray-800 font-mono">
-                            {userLanguage.code.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-600 text-center">
-                          Aastha will respond in your language! 🌍
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-gray-500 text-xs">No recent memories</div>
+                          )}
                         </div>
                       </div>
                     </div>
+                    
+                    <button
+                      onClick={fetchAiMemories}
+                      className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      Refresh Memories
+                    </button>
+                  </div>
 
-                    {/* AI Features Info */}
-                    <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 sm:p-4 rounded-lg border">
-                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">AI Features</h4>
-                      <div className="space-y-2 text-xs sm:text-sm text-gray-700">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Advanced Memory System</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Emotional Intelligence</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Personality Adaptation</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Proactive Conversations</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span>Multi-Language Support</span>
-                        </div>
+                {/* Emotional Intelligence */}
+                <div className="bg-gradient-to-r from-pink-50 to-red-50 p-3 sm:p-4 rounded-lg border">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                    <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-pink-600" />
+                    Emotional Intelligence
+                  </h4>
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Your Current Mood:</span>
+                      <span className="px-2 sm:px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-xs sm:text-sm font-medium capitalize">
+                        {userEmotion.primary}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Emotional Intensity:</span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-800">
+                        {userEmotion.intensity}/10
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(userEmotion.intensity / 10) * 100}%` }}
+                      />
+                    </div>
+                    {userEmotion.secondary.length > 0 && (
+                      <div className="text-xs text-gray-600">
+                        Also detected: {userEmotion.secondary.join(', ')}
                       </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Language Detection */}
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                    <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-indigo-600" />
+                    Language Detection
+                  </h4>
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Detected Language:</span>
+                      <span className="px-2 sm:px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs sm:text-sm font-medium">
+                        {userLanguage.name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm font-medium text-gray-700">Language Code:</span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-800 font-mono">
+                        {userLanguage.code.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-600 text-center">
+                      Aastha will respond in your language! 🌍
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Features Info */}
+                <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 sm:p-4 rounded-lg border">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">AI Features</h4>
+                  <div className="space-y-2 text-xs sm:text-sm text-gray-700">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Advanced Memory System</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Emotional Intelligence</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Personality Adaptation</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Proactive Conversations</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Multi-Language Support</span>
                     </div>
                   </div>
                 </div>
