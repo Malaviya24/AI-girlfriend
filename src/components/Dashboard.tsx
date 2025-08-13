@@ -42,6 +42,43 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
   const [userLanguage, setUserLanguage] = useState({ code: "eng", name: "English" });
   const [showAiPanel, setShowAiPanel] = useState(false);
 
+  // Language and stats update callbacks
+  const handleLanguageUpdate = (language: { code: string; name: string }) => {
+    setUserLanguage(language);
+    console.log('Language updated:', language);
+  };
+
+  const handleUserStatsUpdate = (stats: any) => {
+    // Update user stats if needed
+    if (stats.languagePreference) {
+      setUserLanguage(prev => ({
+        ...prev,
+        code: stats.languagePreference,
+        name: getLanguageName(stats.languagePreference)
+      }));
+    }
+    console.log('User stats updated:', stats);
+  };
+
+  // Helper function to get language name from code
+  const getLanguageName = (code: string): string => {
+    const languageMap: Record<string, string> = {
+      eng: "English",
+      spa: "Spanish", 
+      jpn: "Japanese",
+      fra: "French",
+      deu: "German",
+      ita: "Italian",
+      por: "Portuguese",
+      rus: "Russian",
+      kor: "Korean",
+      cmn: "Chinese (Mandarin)",
+      hin: "Hindi",
+      ara: "Arabic"
+    };
+    return languageMap[code] || "English";
+  };
+
   // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -458,6 +495,8 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
              onMoodChange={handleMoodChange}
              currentMood={currentMood}
              onBackToLanding={onBackToLanding}
+             onLanguageUpdate={handleLanguageUpdate}
+             onUserStatsUpdate={handleUserStatsUpdate}
            />
          </div>
        </div>

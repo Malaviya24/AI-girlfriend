@@ -23,9 +23,11 @@ interface VoiceChatProps {
   onMoodChange: (mood: string) => void;
   currentMood: string;
   onBackToLanding: () => void;
+  onLanguageUpdate?: (language: { code: string; name: string }) => void;
+  onUserStatsUpdate?: (stats: any) => void;
 }
 
-export default function VoiceChat({ onMoodChange, currentMood, onBackToLanding }: VoiceChatProps) {
+export default function VoiceChat({ onMoodChange, currentMood, onBackToLanding, onLanguageUpdate, onUserStatsUpdate }: VoiceChatProps) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -212,6 +214,17 @@ export default function VoiceChat({ onMoodChange, currentMood, onBackToLanding }
       }
 
       const data = await response.json();
+      
+      // Update language information if available
+      if (data.detectedLanguage && onLanguageUpdate) {
+        onLanguageUpdate(data.detectedLanguage);
+      }
+      
+      // Update user stats if available
+      if (data.userStats && onUserStatsUpdate) {
+        onUserStatsUpdate(data.userStats);
+      }
+      
       return data.response;
     } catch (error) {
       console.error('Error getting AI response:', error);

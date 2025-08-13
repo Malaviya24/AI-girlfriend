@@ -70,5 +70,14 @@
     "mood": "playful",
     "score": 0,
     "createdAt": 1755087496092
+  },
+  {
+    "id": "1755088886832-085y11",
+    "userId": "default",
+    "text": "Hey let's talk in gujarati",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755088886832
   }
 ]
