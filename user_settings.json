@@ -1,10 +1,10 @@
 {
   "default": {
     "personality": {
-      "playfulness": 0.8,
-      "romantic": 0.95,
-      "talkative": 0.9,
-      "caring": 0.9
+      "playfulness": 1,
+      "romantic": 1,
+      "talkative": 1,
+      "caring": 1
     },
     "optIn": {
       "proactive": true,

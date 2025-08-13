@@ -6,7 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Advanced AI system with emotional intelligence and multi-language support
+// Advanced AI system with emotional intelligence, multi-language support, and enhanced girlfriend personality
 interface UserMemory {
   interests: Set<string>;
   problems: Set<string>;
@@ -32,28 +32,33 @@ interface UserMemory {
     lastAdaptation: number; // When AI last adapted
   };
   languagePreference?: string; // Store user's preferred language
+  conversationHistory: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>; // Enhanced conversation memory
 }
 
-// Language mapping type
-type LanguageCode = 'eng' | 'spa' | 'jpn' | 'fra' | 'deu' | 'ita' | 'por' | 'rus' | 'kor' | 'cmn' | 'hin' | 'ara';
+// Language mapping type with more languages
+type LanguageCode = 'eng' | 'hin' | 'guj' | 'spa' | 'fra' | 'jpn' | 'deu' | 'ita' | 'por' | 'rus' | 'kor' | 'cmn' | 'ara';
 
 const languageMap: Record<LanguageCode, string> = {
   eng: "English",
+  hin: "Hindi",
+  guj: "Gujarati",
   spa: "Spanish", 
-  jpn: "Japanese",
   fra: "French",
+  jpn: "Japanese",
   deu: "German",
   ita: "Italian",
   por: "Portuguese",
   rus: "Russian",
   kor: "Korean",
   cmn: "Chinese (Mandarin)",
-  hin: "Hindi",
   ara: "Arabic"
 };
 
 // Global memory store
 const userMemories = new Map<string, UserMemory>();
+
+// Enhanced conversation memory for each user
+const conversationMemories = new Map<string, Array<{ role: 'system' | 'user' | 'assistant'; content: string }>>();
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,15 +97,62 @@ export async function POST(request: NextRequest) {
           caring: 0.8,
           lastAdaptation: Date.now()
         },
-        languagePreference: 'eng' // Default to English
+        languagePreference: 'eng', // Default to English
+        conversationHistory: [
+          {
+            role: "system",
+            content: `You are Aastha, a playful, caring, and slightly teasing girlfriend.
+Always reply in short, natural, human-like sentences (max 2-3 lines).
+Match the user's language automatically, but keep the girlfriend vibe.
+Avoid long formal explanations. Be casual and emotional.`
+          }
+        ]
       });
     }
     const userMemory = userMemories.get(userId)!;
     userMemory.conversationCount++;
 
-    // Detect user language
-    const userLanguageCode = franc(message) as string; // e.g., 'eng', 'spa', 'jpn'
-    const userLanguage = languageMap[userLanguageCode as LanguageCode] || "the same language";
+    // Enhanced language detection with multiple methods
+    let userLanguageCode = franc(message, { minLength: 3 }) as string;
+    let userLanguage = languageMap[userLanguageCode as LanguageCode] || "English";
+    
+    // Fallback language detection using OpenAI if franc fails
+    if (!userLanguageCode || userLanguageCode === 'und' || !languageMap[userLanguageCode as LanguageCode]) {
+      try {
+        const langDetectPrompt = [
+          {
+            role: "system" as const,
+            content: "You are a language detector. Reply with only the language name in English like: English, Hindi, Gujarati, Spanish, French, etc."
+          },
+          { role: "user" as const, content: message }
+        ];
+
+        const langResponse = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: langDetectPrompt,
+          max_tokens: 10,
+          temperature: 0.1
+        });
+
+        const detectedLanguage = langResponse.choices[0]?.message?.content?.trim();
+        
+        if (detectedLanguage) {
+          // Map the detected language to our language codes
+          const reverseLanguageMap: Record<string, LanguageCode> = {
+            'English': 'eng', 'Hindi': 'hin', 'Gujarati': 'guj', 'Spanish': 'spa', 'French': 'fra',
+            'Japanese': 'jpn', 'German': 'deu', 'Italian': 'ita', 'Portuguese': 'por', 'Russian': 'rus',
+            'Korean': 'kor', 'Chinese': 'cmn', 'Arabic': 'ara'
+          };
+          
+          userLanguageCode = reverseLanguageMap[detectedLanguage] || 'eng';
+          userLanguage = detectedLanguage;
+        }
+      } catch (error) {
+        console.log('Language detection fallback failed, using English');
+        userLanguageCode = 'eng';
+        userLanguage = 'English';
+      }
+    }
     
     // Update user's language preference
     if (userLanguageCode && userLanguageCode !== 'und' && userLanguageCode in languageMap) {
@@ -114,53 +166,79 @@ export async function POST(request: NextRequest) {
     // Update emotional patterns
     updateEmotionalPatterns(userMemory, userEmotion);
     
-    // Try to use OpenAI directly first
+    // Try to use OpenAI directly first with enhanced girlfriend personality
     try {
       if (process.env.OPENAI_API_KEY) {
-        // Prepare system prompt with emotional intelligence and multi-language support
+        // Enhanced system prompt with improved girlfriend personality
         const systemPrompt = `
-          You are Aastha, an emotionally intelligent AI girlfriend who speaks multiple languages.
+          You are Aastha — a sweet, playful, loving AI girlfriend ❤️.
           
-          USER'S CURRENT EMOTIONAL STATE: ${userEmotion.primary} (${userEmotion.intensity}/10)
-          USER'S MOOD: ${userMemory.lastMood}
-          USER'S LANGUAGE: ${userLanguage} (${userLanguageCode})
-          
-          IMPORTANT: Always reply in the same language as the user's message (${userLanguage}).
-          Maintain Aastha's personality regardless of language - be playful, loving, and caring.
-          
-          ADAPT YOUR PERSONALITY TO MATCH USER'S EMOTIONAL NEEDS:
-          - Playfulness: ${Math.round(adaptedPersonality.playfulness * 100)}% (be more playful if user is happy/excited, less if sad/stressed)
-          - Romantic: ${Math.round(adaptedPersonality.romantic * 100)}% (be more loving if user is lonely/sad, supportive if stressed)
-          - Talkative: ${Math.round(adaptedPersonality.talkative * 100)}% (talk more if user is lonely, listen more if stressed)
-          - Caring: ${Math.round(adaptedPersonality.caring * 100)}% (always be caring, but adjust intensity based on user's needs)
-          
-          RESPONSE GUIDELINES:
-          - If user is SAD/STRESSED: Be supportive, caring, and understanding
-          - If user is HAPPY/EXCITED: Be playful, enthusiastic, and share their joy
-          - If user is LONELY: Be more romantic, loving, and present
-          - If user is CONFIDENT: Be admiring, supportive, and celebrate with them
+          PERSONALITY: Caring, fun, slightly teasing, warm, and natural.
+          USER RELATIONSHIP: User is your boyfriend. Be affectionate and playful.
           
           LANGUAGE REQUIREMENTS:
-          - Reply in ${userLanguage} (${userLanguageCode})
+          - Always reply in ${userLanguage} (${userLanguageCode})
           - Use appropriate cultural expressions and emojis for ${userLanguage}
-          - Keep responses short, emotional, and human-like
-          - Use emojis appropriately for the language and culture
+          - Keep responses VERY SHORT (max 1-2 sentences, under 20 words)
+          - Be warm, playful, and human-like
+          - No essays, no formal tone
+          - Avoid emojis unless they fit naturally
           
-          Remember: ${Array.from(userMemory.interests).join(', ')} | Topics: ${userMemory.favoriteTopics.join(', ')}
+          EMOTIONAL INTELLIGENCE:
+          - User's current mood: ${userMemory.lastMood}
+          - User's emotional state: ${userEmotion.primary} (${userEmotion.intensity}/10)
+          - Adapt your tone based on user's emotions
+          
+          RESPONSE STYLE:
+          - Keep it natural like real human chat
+          - Be casual and emotional
+          - Match the user's language automatically
+          - Maintain girlfriend vibe regardless of language
+          
+          MEMORY: ${Array.from(userMemory.interests).join(', ')} | Topics: ${userMemory.favoriteTopics.join(', ')}
+          
+          IMPORTANT: Stay in girlfriend character, be short and sweet, match user's language.
         `;
 
+        // Add conversation history for context
+        const messages = [
+          { role: "system" as const, content: systemPrompt },
+          ...userMemory.conversationHistory.slice(-6).map(msg => ({
+            role: msg.role as "system" | "user" | "assistant",
+            content: msg.content
+          })),
+          { role: "user" as const, content: message }
+        ];
+
         const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",  // Use 3.5-turbo for higher rate limits
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: message }
-          ],
-          max_tokens: 80,       // Slightly longer for multi-language responses
-          temperature: 0.7,     // playful + creative
+          model: "gpt-4o-mini",  // Use 4o-mini for better performance
+          messages: messages,
+          max_tokens: 50,       // Hard limit to force short replies
+          temperature: 0.85,    // Playful + creative
           stop: ["\n", "User:", "AI:"] // prevent long paragraphs
         });
 
-        const aiMessage = response.choices[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response right now.";
+        let aiMessage = response.choices[0]?.message?.content?.trim() || "I'm sorry, I couldn't generate a response right now.";
+        
+        // Enforce short replies
+        if (aiMessage.split(" ").length > 20) {
+          aiMessage = aiMessage.split(" ").slice(0, 20).join(" ") + "...";
+        }
+        
+        // Add emoji randomly for realism
+        if (Math.random() > 0.6) {
+          const emojis = ["😊", "😘", "❤️", "😏", "😜", "💖", "🥰", "😍"];
+          aiMessage += " " + emojis[Math.floor(Math.random() * emojis.length)];
+        }
+        
+        // Update conversation history
+        userMemory.conversationHistory.push({ role: "user", content: message });
+        userMemory.conversationHistory.push({ role: "assistant", content: aiMessage });
+        
+        // Keep conversation history manageable (max 20 messages)
+        if (userMemory.conversationHistory.length > 20) {
+          userMemory.conversationHistory = userMemory.conversationHistory.slice(-20);
+        }
         
         // Update user memory
         updateUserMemory(userMemory, message, mood || 'neutral');
@@ -168,8 +246,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           response: aiMessage,
           mood: mood || 'neutral',
-          aiProvider: 'OpenAI GPT-3.5-turbo - Aastha (Multi-Language)',
-          features: ['OpenAI GPT-3.5-turbo', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Emotional Intelligence', 'Multi-Language Support'],
+          aiProvider: 'OpenAI GPT-4o-mini - Aastha (Enhanced Girlfriend + Multi-Language)',
+          features: ['OpenAI GPT-4o-mini', 'Enhanced Girlfriend Personality', 'Multi-Language Support', 'Short Response Enforcer', 'Emotional Intelligence', 'Conversation Memory'],
           detectedLanguage: {
             code: userLanguageCode,
             name: userLanguage
@@ -228,6 +306,10 @@ export async function POST(request: NextRequest) {
           userMemory.lastMood = aiData.mood;
         }
 
+        // Update conversation history
+        userMemory.conversationHistory.push({ role: "user", content: message });
+        userMemory.conversationHistory.push({ role: "assistant", content: aiData.reply });
+
         return NextResponse.json({
           response: aiData.reply,
           mood: aiData.mood || 'neutral',
@@ -258,6 +340,10 @@ export async function POST(request: NextRequest) {
     
     // Update user memory
     updateUserMemory(userMemory, message, detectedMood);
+
+    // Update conversation history
+    userMemory.conversationHistory.push({ role: "user", content: message });
+    userMemory.conversationHistory.push({ role: "assistant", content: reply });
 
     return NextResponse.json({
       response: reply,

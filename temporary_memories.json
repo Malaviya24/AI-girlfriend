@@ -144,15 +144,6 @@
     "createdAt": 1755086212711
   },
   {
-    "id": "1755086585819-xr57ee",
-    "userId": "default",
-    "text": "Hey",
-    "date": "Wed Aug 13 2025",
-    "mood": "happy",
-    "score": 0,
-    "createdAt": 1755086585819
-  },
-  {
     "id": "1755086597824-872coc",
     "userId": "default",
     "text": "Not ",
@@ -331,5 +322,68 @@
     "mood": "playful",
     "score": 0,
     "createdAt": 1755087592978
+  },
+  {
+    "id": "1755089534649-ws3l5n",
+    "userId": "default",
+    "text": "Let's talk in gujarati ",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755089534649
+  },
+  {
+    "id": "1755089596387-yqspbc",
+    "userId": "default",
+    "text": "Haa",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755089596387
+  },
+  {
+    "id": "1755092192429-9kph7g",
+    "userId": "default",
+    "text": "not much ",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755092192429
+  },
+  {
+    "id": "1755092230827-i0j6c6",
+    "userId": "default",
+    "text": "ok so your are my girlfriend now mine",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755092230827
+  },
+  {
+    "id": "1755092250471-gbysci",
+    "userId": "default",
+    "text": "such a good bond",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755092250471
+  },
+  {
+    "id": "1755092268446-c56azs",
+    "userId": "default",
+    "text": "ok so tell me about your self",
+    "date": "Wed Aug 13 2025",
+    "mood": "curious",
+    "score": 0,
+    "createdAt": 1755092268446
+  },
+  {
+    "id": "1755092289315-y94sng",
+    "userId": "default",
+    "text": "ans pervious qestons",
+    "date": "Wed Aug 13 2025",
+    "mood": "curious",
+    "score": 0,
+    "createdAt": 1755092289315
   }
 ]
