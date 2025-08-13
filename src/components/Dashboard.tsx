@@ -719,45 +719,13 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                               step="0.05"
                               value={(aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6}
                               onChange={e => updateAiPersonality(trait, parseFloat(e.target.value))}
-                              className="w-full h-3 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider touch-manipulation"
+                              className="w-full h-3 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer touch-manipulation"
                               style={{ 
                                 WebkitAppearance: 'none',
                                 WebkitTapHighlightColor: 'transparent',
                                 touchAction: 'manipulation'
                               }}
                             />
-                            <style jsx>{`
-                              .slider::-webkit-slider-thumb {
-                                -webkit-appearance: none;
-                                appearance: none;
-                                width: 20px;
-                                height: 20px;
-                                border-radius: 50%;
-                                background: #8b5cf6;
-                                cursor: pointer;
-                                border: 2px solid white;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                              }
-                              .slider::-moz-range-thumb {
-                                width: 20px;
-                                height: 20px;
-                                border-radius: 50%;
-                                background: #8b5cf6;
-                                cursor: pointer;
-                                border: 2px solid white;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                              }
-                              @media (max-width: 640px) {
-                                .slider::-webkit-slider-thumb {
-                                  width: 24px;
-                                  height: 24px;
-                                }
-                                .slider::-moz-range-thumb {
-                                  width: 24px;
-                                  height: 24px;
-                                }
-                              }
-                            `}</style>
                           </div>
                         </div>
                       ))}
