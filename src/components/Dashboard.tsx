@@ -55,6 +55,69 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Add mobile-specific CSS for range sliders
+  useEffect(() => {
+    if (isMobile) {
+      const style = document.createElement('style');
+      style.textContent = `
+        input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-track {
+          background: #e5e7eb;
+          height: 8px;
+          border-radius: 4px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          cursor: pointer;
+          margin-top: -8px;
+        }
+        
+        input[type="range"]::-moz-range-track {
+          background: #e5e7eb;
+          height: 8px;
+          border-radius: 4px;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          cursor: pointer;
+        }
+        
+        input[type="range"]:focus {
+          outline: none;
+        }
+        
+        input[type="range"]:focus::-webkit-slider-thumb {
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, [isMobile]);
+
   // Initialize with a default conversation
   useEffect(() => {
     if (conversations.length === 0) {
@@ -218,8 +281,9 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                 {/* AI Panel */}
                 <button
                   onClick={() => setShowAiPanel(!showAiPanel)}
-                  className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 active:from-blue-700 active:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 touch-manipulation"
                   title="AI Intelligence Panel"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Brain className="w-5 h-5" />
                 </button>
@@ -254,8 +318,9 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                 {/* AI Panel Button - Mobile */}
                 <button
                   onClick={() => setShowAiPanel(!showAiPanel)}
-                  className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-colors"
+                  className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 active:from-blue-700 active:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 touch-manipulation"
                   title="AI Intelligence"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Brain className="w-4 h-4" />
                 </button>
@@ -454,7 +519,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-2 sm:p-4"
             onClick={() => setShowAiPanel(false)}
           >
             {/* Blurred Background */}
@@ -463,26 +528,31 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10"
+              className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative z-10"
               onClick={(e) => e.stopPropagation()}
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain'
+              }}
             >
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-4 sm:p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Brain className="w-6 h-6 text-blue-600" />
-                    <h3 className="text-xl font-semibold text-gray-800">AI Intelligence Panel</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800">AI Intelligence Panel</h3>
                   </div>
                   <button
                     onClick={() => setShowAiPanel(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     <X className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>
               </div>
               
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* AI Status & Bond */}
                   <div className="space-y-4">
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border">
@@ -512,7 +582,8 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       </div>
                       <button
                         onClick={fetchAiStatus}
-                        className="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                        className="mt-3 w-full px-3 py-3 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-sm font-medium touch-manipulation"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         Refresh Status
                       </button>
@@ -530,15 +601,54 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                                 {Math.round(((aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6) * 100)}%
                               </span>
                             </div>
-                            <input
-                              type="range"
-                              min="0" 
-                              max="1" 
-                              step="0.05"
-                              value={(aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6}
-                              onChange={e => updateAiPersonality(trait, parseFloat(e.target.value))}
-                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                            />
+                            <div className="relative">
+                              <input
+                                type="range"
+                                min="0" 
+                                max="1" 
+                                step="0.05"
+                                value={(aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6}
+                                onChange={e => updateAiPersonality(trait, parseFloat(e.target.value))}
+                                className="w-full h-3 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider touch-manipulation"
+                                style={{ 
+                                  WebkitAppearance: 'none',
+                                  WebkitTapHighlightColor: 'transparent',
+                                  touchAction: 'manipulation'
+                                }}
+                              />
+                              <style jsx>{`
+                                .slider::-webkit-slider-thumb {
+                                  -webkit-appearance: none;
+                                  appearance: none;
+                                  width: 20px;
+                                  height: 20px;
+                                  border-radius: 50%;
+                                  background: #8b5cf6;
+                                  cursor: pointer;
+                                  border: 2px solid white;
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                }
+                                .slider::-moz-range-thumb {
+                                  width: 20px;
+                                  height: 20px;
+                                  border-radius: 50%;
+                                  background: #8b5cf6;
+                                  cursor: pointer;
+                                  border: 2px solid white;
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                }
+                                @media (max-width: 640px) {
+                                  .slider::-webkit-slider-thumb {
+                                    width: 24px;
+                                    height: 24px;
+                                  }
+                                  .slider::-moz-range-thumb {
+                                    width: 24px;
+                                    height: 24px;
+                                  }
+                                }
+                              `}</style>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -548,10 +658,10 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                   {/* AI Memories */}
                   <div className="space-y-4">
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
-                                                 <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                             <MemoryStick className="w-5 h-5 mr-2 text-green-600" />
-                             AI Memories
-                           </h4>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <MemoryStick className="w-5 h-5 mr-2 text-green-600" />
+                        AI Memories
+                      </h4>
                       
                       <div className="space-y-4">
                         {/* Permanent Memories */}
@@ -595,67 +705,68 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       
                       <button
                         onClick={fetchAiMemories}
-                        className="mt-3 w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                        className="mt-3 w-full px-3 py-3 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors text-sm font-medium touch-manipulation"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         Refresh Memories
                       </button>
                     </div>
 
-                                         {/* Emotional Intelligence */}
-                     <div className="bg-gradient-to-r from-pink-50 to-red-50 p-4 rounded-lg border">
-                       <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                         <Brain className="w-5 h-5 mr-2 text-pink-600" />
-                         Emotional Intelligence
-                       </h4>
-                       <div className="space-y-3">
-                         <div className="flex justify-between items-center">
-                           <span className="text-sm font-medium text-gray-700">Your Current Mood:</span>
-                           <span className="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm font-medium capitalize">
-                             {userEmotion.primary}
-                           </span>
-                         </div>
-                         <div className="flex justify-between items-center">
-                           <span className="text-sm font-medium text-gray-700">Emotional Intensity:</span>
-                           <span className="text-sm font-semibold text-gray-800">
-                             {userEmotion.intensity}/10
-                           </span>
-                         </div>
-                         <div className="w-full bg-gray-200 rounded-full h-2">
-                           <div
-                             className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full transition-all duration-300"
-                             style={{ width: `${(userEmotion.intensity / 10) * 100}%` }}
-                           />
-                         </div>
-                         {userEmotion.secondary.length > 0 && (
-                           <div className="text-xs text-gray-600">
-                             Also detected: {userEmotion.secondary.join(', ')}
-                           </div>
-                         )}
-                       </div>
-                     </div>
+                    {/* Emotional Intelligence */}
+                    <div className="bg-gradient-to-r from-pink-50 to-red-50 p-4 rounded-lg border">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                        <Brain className="w-5 h-5 mr-2 text-pink-600" />
+                        Emotional Intelligence
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700">Your Current Mood:</span>
+                          <span className="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm font-medium capitalize">
+                            {userEmotion.primary}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium text-gray-700">Emotional Intensity:</span>
+                          <span className="text-sm font-semibold text-gray-800">
+                            {userEmotion.intensity}/10
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(userEmotion.intensity / 10) * 100}%` }}
+                          />
+                        </div>
+                        {userEmotion.secondary.length > 0 && (
+                          <div className="text-xs text-gray-600">
+                            Also detected: {userEmotion.secondary.join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                     {/* AI Features Info */}
-                     <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border">
-                       <h4 className="text-lg font-semibold text-gray-800 mb-3">AI Features</h4>
-                       <div className="space-y-2 text-sm text-gray-700">
-                         <div className="flex items-center space-x-2">
-                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                           <span>Advanced Memory System</span>
-                         </div>
-                         <div className="flex items-center space-x-2">
-                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                           <span>Emotional Intelligence</span>
-                         </div>
-                         <div className="flex items-center space-x-2">
-                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                           <span>Personality Adaptation</span>
-                         </div>
-                         <div className="flex items-center space-x-2">
-                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                           <span>Proactive Conversations</span>
-                         </div>
-                       </div>
-                     </div>
+                    {/* AI Features Info */}
+                    <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">AI Features</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Advanced Memory System</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Emotional Intelligence</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Personality Adaptation</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Proactive Conversations</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

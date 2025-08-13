@@ -1,1 +1,15 @@
-{}
+{
+  "default": {
+    "personality": {
+      "playfulness": 0.8,
+      "romantic": 0.75,
+      "talkative": 0.95,
+      "caring": 0.8
+    },
+    "optIn": {
+      "proactive": true,
+      "voice": false
+    },
+    "specialDays": []
+  }
+}

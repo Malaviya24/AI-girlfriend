@@ -34,5 +34,41 @@
     "mood": "playful",
     "score": 0,
     "createdAt": 1755085733193
+  },
+  {
+    "id": "1755086630076-l10d1f",
+    "userId": "default",
+    "text": "Tu mane shayari ke broken heart mate gujrati ma",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0.6,
+    "createdAt": 1755086630076
+  },
+  {
+    "id": "1755087367381-joplqh",
+    "userId": "default",
+    "text": "Na",
+    "date": "Wed Aug 13 2025",
+    "mood": "supportive",
+    "score": 0,
+    "createdAt": 1755087367381
+  },
+  {
+    "id": "1755087426322-gjy4gy",
+    "userId": "default",
+    "text": "Ha please ",
+    "date": "Wed Aug 13 2025",
+    "mood": "supportive",
+    "score": 0,
+    "createdAt": 1755087426322
+  },
+  {
+    "id": "1755087496092-ukksiu",
+    "userId": "default",
+    "text": "Na have tu mari gf chho so hu khush chhu",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755087496092
   }
 ]
