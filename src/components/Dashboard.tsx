@@ -65,12 +65,14 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
           appearance: none;
           background: transparent;
           cursor: pointer;
+          touch-action: manipulation;
         }
         
         input[type="range"]::-webkit-slider-track {
           background: #e5e7eb;
           height: 8px;
           border-radius: 4px;
+          border: none;
         }
         
         input[type="range"]::-webkit-slider-thumb {
@@ -84,12 +86,19 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
           box-shadow: 0 2px 4px rgba(0,0,0,0.2);
           cursor: pointer;
           margin-top: -8px;
+          transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:active {
+          transform: scale(1.1);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
         input[type="range"]::-moz-range-track {
           background: #e5e7eb;
           height: 8px;
           border-radius: 4px;
+          border: none;
         }
         
         input[type="range"]::-moz-range-thumb {
@@ -100,6 +109,12 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
           border: 2px solid white;
           box-shadow: 0 2px 4px rgba(0,0,0,0.2);
           cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-moz-range-thumb:active {
+          transform: scale(1.1);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         
         input[type="range"]:focus {
@@ -108,6 +123,54 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
         
         input[type="range"]:focus::-webkit-slider-thumb {
           box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+        
+        input[type="range"]:focus::-moz-range-thumb {
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 640px) {
+          input[type="range"]::-webkit-slider-thumb {
+            width: 28px;
+            height: 28px;
+            margin-top: -10px;
+          }
+          
+          input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+          }
+          
+          input[type="range"]::-webkit-slider-track {
+            height: 10px;
+          }
+          
+          input[type="range"]::-moz-range-track {
+            height: 10px;
+          }
+        }
+        
+        /* Touch device improvements */
+        @media (hover: none) and (pointer: coarse) {
+          input[type="range"]::-webkit-slider-thumb {
+            width: 32px;
+            height: 32px;
+            margin-top: -12px;
+          }
+          
+          input[type="range"]::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+          }
+          
+          input[type="range"]::-webkit-slider-track {
+            height: 12px;
+          }
+          
+          input[type="range"]::-moz-range-track {
+            height: 12px;
+          }
         }
       `;
       document.head.appendChild(style);
@@ -537,9 +600,9 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
             >
               <div className="p-4 sm:p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Brain className="w-6 h-6 text-blue-600" />
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800">AI Intelligence Panel</h3>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                    <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800">AI Intelligence Panel</h3>
                   </div>
                   <button
                     onClick={() => setShowAiPanel(false)}
@@ -551,25 +614,25 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                 </div>
               </div>
               
-              <div className="p-4 sm:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="p-3 sm:p-4 lg:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                   {/* AI Status & Bond */}
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <Brain className="w-5 h-5 mr-2 text-blue-600" />
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
                         AI Status
                       </h4>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Current Mood:</span>
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Current Mood:</span>
+                          <span className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-medium">
                             {aiStatus.mood || 'happy'}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Bond Level:</span>
-                          <span className="text-sm font-semibold text-gray-800">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Bond Level:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-gray-800">
                             {Math.round(aiStatus.bond || 0)}/100
                           </span>
                         </div>
@@ -582,7 +645,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       </div>
                       <button
                         onClick={fetchAiStatus}
-                        className="mt-3 w-full px-3 py-3 sm:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-sm font-medium touch-manipulation"
+                        className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         Refresh Status
@@ -590,12 +653,12 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                     </div>
 
                     {/* Personality Settings */}
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Personality Settings</h4>
-                      <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">Personality Settings</h4>
+                      <div className="space-y-3 sm:space-y-4">
                         {["playfulness", "romantic", "talkative", "caring"].map((trait) => (
                           <div key={trait} className="space-y-2">
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between text-xs sm:text-sm">
                               <span className="capitalize font-medium text-gray-700">{trait}</span>
                               <span className="text-gray-600">
                                 {Math.round(((aiSettings.personality && aiSettings.personality[trait as keyof typeof aiSettings.personality]) || 0.6) * 100)}%
@@ -656,18 +719,18 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                   </div>
 
                   {/* AI Memories */}
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <MemoryStick className="w-5 h-5 mr-2 text-green-600" />
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                        <MemoryStick className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-600" />
                         AI Memories
                       </h4>
                       
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {/* Permanent Memories */}
                         <div>
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">Permanent Memories</h5>
-                          <div className="max-h-32 overflow-y-auto space-y-2">
+                          <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Permanent Memories</h5>
+                          <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
                             {aiMemories.permanent && aiMemories.permanent.length > 0 ? (
                               aiMemories.permanent.slice(-3).map((mem: any) => (
                                 <div key={mem.id} className="text-xs bg-white p-2 rounded border">
@@ -685,8 +748,8 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
 
                         {/* Temporary Memories */}
                         <div>
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">Recent Memories</h5>
-                          <div className="max-h-32 overflow-y-auto space-y-2">
+                          <h5 className="text-xs sm:text-sm font-medium text-gray-700 mb-2">Recent Memories</h5>
+                          <div className="max-h-24 sm:max-h-32 overflow-y-auto space-y-2">
                             {aiMemories.temporary && aiMemories.temporary.length > 0 ? (
                               aiMemories.temporary.slice(-3).map((mem: any) => (
                                 <div key={mem.id} className="text-xs bg-white p-2 rounded border">
@@ -705,7 +768,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       
                       <button
                         onClick={fetchAiMemories}
-                        className="mt-3 w-full px-3 py-3 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors text-sm font-medium touch-manipulation"
+                        className="mt-2 sm:mt-3 w-full px-3 py-2 sm:py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 active:bg-green-700 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         Refresh Memories
@@ -713,21 +776,21 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                     </div>
 
                     {/* Emotional Intelligence */}
-                    <div className="bg-gradient-to-r from-pink-50 to-red-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                        <Brain className="w-5 h-5 mr-2 text-pink-600" />
+                    <div className="bg-gradient-to-r from-pink-50 to-red-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-pink-600" />
                         Emotional Intelligence
                       </h4>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Your Current Mood:</span>
-                          <span className="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm font-medium capitalize">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Your Current Mood:</span>
+                          <span className="px-2 sm:px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-xs sm:text-sm font-medium capitalize">
                             {userEmotion.primary}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium text-gray-700">Emotional Intensity:</span>
-                          <span className="text-sm font-semibold text-gray-800">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Emotional Intensity:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-gray-800">
                             {userEmotion.intensity}/10
                           </span>
                         </div>
@@ -746,9 +809,9 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                     </div>
 
                     {/* AI Features Info */}
-                    <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3">AI Features</h4>
-                      <div className="space-y-2 text-sm text-gray-700">
+                    <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">AI Features</h4>
+                      <div className="space-y-2 text-xs sm:text-sm text-gray-700">
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <span>Advanced Memory System</span>
