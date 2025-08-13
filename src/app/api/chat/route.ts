@@ -128,7 +128,7 @@ Avoid long formal explanations. Be casual and emotional.`
         ];
 
         const langResponse = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: "gpt-3.5-turbo",
           messages: langDetectPrompt,
           max_tokens: 10,
           temperature: 0.1
@@ -211,7 +211,7 @@ Avoid long formal explanations. Be casual and emotional.`
         ];
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4o-mini",  // Use 4o-mini for better performance
+          model: "gpt-3.5-turbo",  // Use 3.5-turbo for better rate limits and cost efficiency
           messages: messages,
           max_tokens: 50,       // Hard limit to force short replies
           temperature: 0.85,    // Playful + creative
@@ -246,8 +246,8 @@ Avoid long formal explanations. Be casual and emotional.`
         return NextResponse.json({
           response: aiMessage,
           mood: mood || 'neutral',
-          aiProvider: 'OpenAI GPT-4o-mini - Aastha (Enhanced Girlfriend + Multi-Language)',
-          features: ['OpenAI GPT-4o-mini', 'Enhanced Girlfriend Personality', 'Multi-Language Support', 'Short Response Enforcer', 'Emotional Intelligence', 'Conversation Memory'],
+          aiProvider: 'OpenAI GPT-3.5-turbo - Aastha (Enhanced Girlfriend + Multi-Language)',
+          features: ['OpenAI GPT-3.5-turbo', 'Enhanced Girlfriend Personality', 'Multi-Language Support', 'Short Response Enforcer', 'Emotional Intelligence', 'Conversation Memory'],
           detectedLanguage: {
             code: userLanguageCode,
             name: userLanguage
