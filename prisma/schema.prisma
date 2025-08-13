@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  mood      String   @default("neutral")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  conversations Conversation[]
+  preferences   UserPreference[]
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  title     String
+  mood      String   @default("neutral")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  userId String
+  user   User     @relation(fields: [userId], references: [id])
+  messages Message[]
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  content        String
+  role           String   // "user" or "assistant"
+  timestamp      DateTime @default(now())
+  voiceUrl       String?  // URL to stored voice file
+  
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model UserPreference {
+  id       String @id @default(cuid())
+  key      String
+  value    String
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, key])
+}

@@ -1,0 +1,32 @@
+{
+  "name": "aastha-ai-express-server",
+  "version": "1.0.0",
+  "description": "Express server for Aastha AI advanced chat functionality",
+  "main": "ai-girlfriend-server-updated.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ai-girlfriend-server-updated.js",
+    "dev": "nodemon ai-girlfriend-server-updated.js",
+    "install-deps": "npm install express node-fetch dotenv cors body-parser"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "express",
+    "openai",
+    "memory",
+    "personality"
+  ],
+  "author": "Aastha AI Team",
+  "license": "MIT"
+}
