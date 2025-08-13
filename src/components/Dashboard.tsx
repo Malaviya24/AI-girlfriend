@@ -39,6 +39,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
     personality: { playfulness: 0.6, romantic: 0.7, talkative: 0.6, caring: 0.8 }
   });
   const [userEmotion, setUserEmotion] = useState({ primary: "neutral", intensity: 5, secondary: [] });
+  const [userLanguage, setUserLanguage] = useState({ code: "eng", name: "English" });
   const [showAiPanel, setShowAiPanel] = useState(false);
 
   // Check if mobile
@@ -808,6 +809,31 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       </div>
                     </div>
 
+                    {/* Language Detection */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-3 sm:p-4 rounded-lg border">
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center">
+                        <Brain className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-indigo-600" />
+                        Language Detection
+                      </h4>
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Detected Language:</span>
+                          <span className="px-2 sm:px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs sm:text-sm font-medium">
+                            {userLanguage.name}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700">Language Code:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-gray-800 font-mono">
+                            {userLanguage.code.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600 text-center">
+                          Aastha will respond in your language! 🌍
+                        </div>
+                      </div>
+                    </div>
+
                     {/* AI Features Info */}
                     <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 sm:p-4 rounded-lg border">
                       <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">AI Features</h4>
@@ -827,6 +853,10 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                           <span>Proactive Conversations</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Multi-Language Support</span>
                         </div>
                       </div>
                     </div>

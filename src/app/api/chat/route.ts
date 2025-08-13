@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from "openai";
+import { franc } from "franc";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Advanced AI system with emotional intelligence
+// Advanced AI system with emotional intelligence and multi-language support
 interface UserMemory {
   interests: Set<string>;
   problems: Set<string>;
@@ -30,7 +31,26 @@ interface UserMemory {
     caring: number;         // AI's current caring level
     lastAdaptation: number; // When AI last adapted
   };
+  languagePreference?: string; // Store user's preferred language
 }
+
+// Language mapping type
+type LanguageCode = 'eng' | 'spa' | 'jpn' | 'fra' | 'deu' | 'ita' | 'por' | 'rus' | 'kor' | 'cmn' | 'hin' | 'ara';
+
+const languageMap: Record<LanguageCode, string> = {
+  eng: "English",
+  spa: "Spanish", 
+  jpn: "Japanese",
+  fra: "French",
+  deu: "German",
+  ita: "Italian",
+  por: "Portuguese",
+  rus: "Russian",
+  kor: "Korean",
+  cmn: "Chinese (Mandarin)",
+  hin: "Hindi",
+  ara: "Arabic"
+};
 
 // Global memory store
 const userMemories = new Map<string, UserMemory>();
@@ -71,11 +91,21 @@ export async function POST(request: NextRequest) {
           talkative: 0.6,
           caring: 0.8,
           lastAdaptation: Date.now()
-        }
+        },
+        languagePreference: 'eng' // Default to English
       });
     }
     const userMemory = userMemories.get(userId)!;
     userMemory.conversationCount++;
+
+    // Detect user language
+    const userLanguageCode = franc(message) as string; // e.g., 'eng', 'spa', 'jpn'
+    const userLanguage = languageMap[userLanguageCode as LanguageCode] || "the same language";
+    
+    // Update user's language preference
+    if (userLanguageCode && userLanguageCode !== 'und' && userLanguageCode in languageMap) {
+      userMemory.languagePreference = userLanguageCode;
+    }
 
     // Analyze user's emotional state and adapt AI personality
     const userEmotion = analyzeUserEmotion(message, userMemory);
@@ -87,12 +117,16 @@ export async function POST(request: NextRequest) {
     // Try to use OpenAI directly first
     try {
       if (process.env.OPENAI_API_KEY) {
-        // Prepare system prompt with emotional intelligence
+        // Prepare system prompt with emotional intelligence and multi-language support
         const systemPrompt = `
-          You are Aastha, an emotionally intelligent AI girlfriend. 
+          You are Aastha, an emotionally intelligent AI girlfriend who speaks multiple languages.
           
           USER'S CURRENT EMOTIONAL STATE: ${userEmotion.primary} (${userEmotion.intensity}/10)
           USER'S MOOD: ${userMemory.lastMood}
+          USER'S LANGUAGE: ${userLanguage} (${userLanguageCode})
+          
+          IMPORTANT: Always reply in the same language as the user's message (${userLanguage}).
+          Maintain Aastha's personality regardless of language - be playful, loving, and caring.
           
           ADAPT YOUR PERSONALITY TO MATCH USER'S EMOTIONAL NEEDS:
           - Playfulness: ${Math.round(adaptedPersonality.playfulness * 100)}% (be more playful if user is happy/excited, less if sad/stressed)
@@ -106,7 +140,12 @@ export async function POST(request: NextRequest) {
           - If user is LONELY: Be more romantic, loving, and present
           - If user is CONFIDENT: Be admiring, supportive, and celebrate with them
           
-          Keep responses short, emotional, and human-like. Use emojis appropriately.
+          LANGUAGE REQUIREMENTS:
+          - Reply in ${userLanguage} (${userLanguageCode})
+          - Use appropriate cultural expressions and emojis for ${userLanguage}
+          - Keep responses short, emotional, and human-like
+          - Use emojis appropriately for the language and culture
+          
           Remember: ${Array.from(userMemory.interests).join(', ')} | Topics: ${userMemory.favoriteTopics.join(', ')}
         `;
 
@@ -116,7 +155,7 @@ export async function POST(request: NextRequest) {
             { role: "system", content: systemPrompt },
             { role: "user", content: message }
           ],
-          max_tokens: 60,       // limit reply length
+          max_tokens: 80,       // Slightly longer for multi-language responses
           temperature: 0.7,     // playful + creative
           stop: ["\n", "User:", "AI:"] // prevent long paragraphs
         });
@@ -129,12 +168,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           response: aiMessage,
           mood: mood || 'neutral',
-          aiProvider: 'OpenAI GPT-4 - Aastha',
-          features: ['OpenAI GPT-4', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Short Responses'],
+          aiProvider: 'OpenAI GPT-3.5-turbo - Aastha (Multi-Language)',
+          features: ['OpenAI GPT-3.5-turbo', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Emotional Intelligence', 'Multi-Language Support'],
+          detectedLanguage: {
+            code: userLanguageCode,
+            name: userLanguage
+          },
           userStats: {
             conversationCount: userMemory.conversationCount,
             interests: Array.from(userMemory.interests),
-            lastMood: userMemory.lastMood
+            lastMood: userMemory.lastMood,
+            languagePreference: userMemory.languagePreference
           }
         });
       }
@@ -156,16 +200,16 @@ export async function POST(request: NextRequest) {
       const aiResponse = await fetch('http://localhost:4000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId, 
-          message, 
-          persistMemory: false 
+        body: JSON.stringify({
+          userId,
+          message,
+          persistMemory: false
         })
       });
 
       if (aiResponse.ok) {
         const aiData = await aiResponse.json();
-        
+
         // Update user memory with AI response data
         if (aiData.usedMemories) {
           // Process AI memories for local storage
@@ -189,10 +233,15 @@ export async function POST(request: NextRequest) {
           mood: aiData.mood || 'neutral',
           aiProvider: 'Advanced AI Backend - Aastha',
           features: ['Advanced AI Backend', 'Memory System', 'Personality Evolution', 'Context Awareness', 'Proactive Responses'],
+          detectedLanguage: {
+            code: userLanguageCode,
+            name: userLanguage
+          },
           userStats: {
             conversationCount: userMemory.conversationCount,
             interests: Array.from(userMemory.interests),
-            lastMood: userMemory.lastMood
+            lastMood: userMemory.lastMood,
+            languagePreference: userMemory.languagePreference
           },
           aiData: aiData // Include all AI data for frontend
         });
@@ -215,10 +264,15 @@ export async function POST(request: NextRequest) {
       mood: detectedMood,
       aiProvider: 'Local AI - Aastha (Advanced AI not available)',
       features: ['Mood detection', 'Memory system', 'Personality evolution', 'Context awareness', 'Local AI'],
+      detectedLanguage: {
+        code: userLanguageCode,
+        name: userLanguage
+      },
       userStats: {
         conversationCount: userMemory.conversationCount,
         interests: Array.from(userMemory.interests),
-        lastMood: userMemory.lastMood
+        lastMood: userMemory.lastMood,
+        languagePreference: userMemory.languagePreference
       }
     });
 
