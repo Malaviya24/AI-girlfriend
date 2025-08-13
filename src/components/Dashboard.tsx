@@ -38,6 +38,7 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
   const [aiSettings, setAiSettings] = useState({ 
     personality: { playfulness: 0.6, romantic: 0.7, talkative: 0.6, caring: 0.8 }
   });
+  const [userEmotion, setUserEmotion] = useState({ primary: "neutral", intensity: 5, secondary: [] });
   const [showAiPanel, setShowAiPanel] = useState(false);
 
   // Check if mobile
@@ -600,28 +601,61 @@ export default function Dashboard({ onBackToLanding }: { onBackToLanding: () => 
                       </button>
                     </div>
 
-                    {/* AI Features Info */}
-                    <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-3">AI Features</h4>
-                      <div className="space-y-2 text-sm text-gray-700">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Advanced Memory System</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Emotional Intelligence</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Personality Adaptation</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span>Proactive Conversations</span>
-                        </div>
-                      </div>
-                    </div>
+                                         {/* Emotional Intelligence */}
+                     <div className="bg-gradient-to-r from-pink-50 to-red-50 p-4 rounded-lg border">
+                       <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                         <Brain className="w-5 h-5 mr-2 text-pink-600" />
+                         Emotional Intelligence
+                       </h4>
+                       <div className="space-y-3">
+                         <div className="flex justify-between items-center">
+                           <span className="text-sm font-medium text-gray-700">Your Current Mood:</span>
+                           <span className="px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm font-medium capitalize">
+                             {userEmotion.primary}
+                           </span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="text-sm font-medium text-gray-700">Emotional Intensity:</span>
+                           <span className="text-sm font-semibold text-gray-800">
+                             {userEmotion.intensity}/10
+                           </span>
+                         </div>
+                         <div className="w-full bg-gray-200 rounded-full h-2">
+                           <div
+                             className="bg-gradient-to-r from-pink-500 to-red-500 h-2 rounded-full transition-all duration-300"
+                             style={{ width: `${(userEmotion.intensity / 10) * 100}%` }}
+                           />
+                         </div>
+                         {userEmotion.secondary.length > 0 && (
+                           <div className="text-xs text-gray-600">
+                             Also detected: {userEmotion.secondary.join(', ')}
+                           </div>
+                         )}
+                       </div>
+                     </div>
+
+                     {/* AI Features Info */}
+                     <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border">
+                       <h4 className="text-lg font-semibold text-gray-800 mb-3">AI Features</h4>
+                       <div className="space-y-2 text-sm text-gray-700">
+                         <div className="flex items-center space-x-2">
+                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                           <span>Advanced Memory System</span>
+                         </div>
+                         <div className="flex items-center space-x-2">
+                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                           <span>Emotional Intelligence</span>
+                         </div>
+                         <div className="flex items-center space-x-2">
+                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                           <span>Personality Adaptation</span>
+                         </div>
+                         <div className="flex items-center space-x-2">
+                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                           <span>Proactive Conversations</span>
+                         </div>
+                       </div>
+                     </div>
                   </div>
                 </div>
               </div>

@@ -133,5 +133,32 @@
     "mood": "curious",
     "score": 0,
     "createdAt": 1755085916510
+  },
+  {
+    "id": "1755086161380-lwtgcu",
+    "userId": "default",
+    "text": "Hello km chhe",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755086161380
+  },
+  {
+    "id": "1755086180530-0ltbb6",
+    "userId": "default",
+    "text": "Mane to saru chhe",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755086180530
+  },
+  {
+    "id": "1755086212711-ad7fzu",
+    "userId": "default",
+    "text": "Mari atyre koi vat nathi karva mate ",
+    "date": "Wed Aug 13 2025",
+    "mood": "happy",
+    "score": 0,
+    "createdAt": 1755086212711
   }
 ]

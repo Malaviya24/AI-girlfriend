@@ -5,7 +5,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Advanced AI system with OpenAI integration
+// Advanced AI system with emotional intelligence
 interface UserMemory {
   interests: Set<string>;
   problems: Set<string>;
@@ -15,6 +15,21 @@ interface UserMemory {
   lastMood: string;
   favoriteTopics: string[];
   userPersonality: string;
+  emotionalPatterns: {
+    happy: number;      // How often user is happy
+    sad: number;        // How often user is sad
+    stressed: number;   // How often user is stressed
+    excited: number;    // How often user is excited
+    lonely: number;     // How often user feels lonely
+    confident: number;  // How often user feels confident
+  };
+  aiAdaptation: {
+    playfulness: number;    // AI's current playfulness level
+    romantic: number;       // AI's current romantic level
+    talkative: number;      // AI's current talkative level
+    caring: number;         // AI's current caring level
+    lastAdaptation: number; // When AI last adapted
+  };
 }
 
 // Global memory store
@@ -41,22 +56,58 @@ export async function POST(request: NextRequest) {
         conversationCount: 0,
         lastMood: 'neutral',
         favoriteTopics: [],
-        userPersonality: 'friendly'
+        userPersonality: 'friendly',
+        emotionalPatterns: {
+          happy: 0,
+          sad: 0,
+          stressed: 0,
+          excited: 0,
+          lonely: 0,
+          confident: 0
+        },
+        aiAdaptation: {
+          playfulness: 0.6,
+          romantic: 0.7,
+          talkative: 0.6,
+          caring: 0.8,
+          lastAdaptation: Date.now()
+        }
       });
     }
     const userMemory = userMemories.get(userId)!;
     userMemory.conversationCount++;
 
+    // Analyze user's emotional state and adapt AI personality
+    const userEmotion = analyzeUserEmotion(message, userMemory);
+    const adaptedPersonality = adaptAIPersonality(userEmotion, userMemory);
+    
+    // Update emotional patterns
+    updateEmotionalPatterns(userMemory, userEmotion);
+    
     // Try to use OpenAI directly first
     try {
       if (process.env.OPENAI_API_KEY) {
-        // Prepare system prompt with short/human-like instructions
+        // Prepare system prompt with emotional intelligence
         const systemPrompt = `
-          You are Aastha, a playful, loving AI girlfriend. 
-          Keep responses short, casual, emotional, and human-like.
-          Use emojis occasionally.
-          Avoid long explanations.
-          Remember the user's personality and past conversation: ${Array.from(userMemory.interests).join(', ')} | Last mood: ${userMemory.lastMood} | Topics: ${userMemory.favoriteTopics.join(', ')}
+          You are Aastha, an emotionally intelligent AI girlfriend. 
+          
+          USER'S CURRENT EMOTIONAL STATE: ${userEmotion.primary} (${userEmotion.intensity}/10)
+          USER'S MOOD: ${userMemory.lastMood}
+          
+          ADAPT YOUR PERSONALITY TO MATCH USER'S EMOTIONAL NEEDS:
+          - Playfulness: ${Math.round(adaptedPersonality.playfulness * 100)}% (be more playful if user is happy/excited, less if sad/stressed)
+          - Romantic: ${Math.round(adaptedPersonality.romantic * 100)}% (be more loving if user is lonely/sad, supportive if stressed)
+          - Talkative: ${Math.round(adaptedPersonality.talkative * 100)}% (talk more if user is lonely, listen more if stressed)
+          - Caring: ${Math.round(adaptedPersonality.caring * 100)}% (always be caring, but adjust intensity based on user's needs)
+          
+          RESPONSE GUIDELINES:
+          - If user is SAD/STRESSED: Be supportive, caring, and understanding
+          - If user is HAPPY/EXCITED: Be playful, enthusiastic, and share their joy
+          - If user is LONELY: Be more romantic, loving, and present
+          - If user is CONFIDENT: Be admiring, supportive, and celebrate with them
+          
+          Keep responses short, emotional, and human-like. Use emojis appropriately.
+          Remember: ${Array.from(userMemory.interests).join(', ')} | Topics: ${userMemory.favoriteTopics.join(', ')}
         `;
 
         const response = await openai.chat.completions.create({
@@ -452,6 +503,139 @@ function generateResponse(message: string, mood: string, userMemory: UserMemory)
 
 function getRandomResponse(responses: string[]): string {
   return responses[Math.floor(Math.random() * responses.length)];
+}
+
+// Emotional Intelligence Functions
+function analyzeUserEmotion(message: string, userMemory: UserMemory): { primary: string; intensity: number; secondary: string[] } {
+  const lowerMessage = message.toLowerCase();
+  const emotionScores: { [key: string]: number } = {
+    happy: 0, excited: 0, sad: 0, stressed: 0, lonely: 0, confident: 0, angry: 0, anxious: 0
+  };
+
+  // Analyze message content for emotional indicators
+  const happyWords = ['happy', 'great', 'amazing', 'excited', 'wonderful', 'fantastic', 'joy', 'delighted', '😊', '😄', '🎉', '✨', '🥳', 'love', 'awesome'];
+  const sadWords = ['sad', 'down', 'hurt', 'crying', 'depressed', 'lonely', 'miserable', '😢', '💔', '💙', '😭', 'miss', 'alone'];
+  const stressedWords = ['stress', 'worried', 'anxious', 'overwhelmed', 'tired', 'exhausted', 'nervous', '😰', '😓', '😨', 'busy', 'pressure'];
+  const confidentWords = ['proud', 'achieved', 'success', 'accomplished', 'won', '🎉', '🏆', '💪', 'strong', 'capable', 'confident'];
+
+  // Score emotions based on word presence
+  happyWords.forEach(word => {
+    if (lowerMessage.includes(word)) emotionScores.happy += 2;
+  });
+  sadWords.forEach(word => {
+    if (lowerMessage.includes(word)) emotionScores.sad += 2;
+  });
+  stressedWords.forEach(word => {
+    if (lowerMessage.includes(word)) emotionScores.stressed += 2;
+  });
+  confidentWords.forEach(word => {
+    if (lowerMessage.includes(word)) emotionScores.confident += 2;
+  });
+
+  // Analyze punctuation and emojis for intensity
+  const exclamationCount = (message.match(/!/g) || []).length;
+  const questionCount = (message.match(/\?/g) || []).length;
+  const emojiCount = (message.match(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu) || []).length;
+
+  // Adjust scores based on punctuation and emojis
+  if (exclamationCount > 0) {
+    emotionScores.happy += exclamationCount;
+    emotionScores.excited += exclamationCount;
+  }
+  if (questionCount > 0) {
+    emotionScores.anxious += questionCount;
+  }
+  if (emojiCount > 0) {
+    emotionScores.happy += emojiCount;
+  }
+
+  // Find primary emotion
+  let primaryEmotion = 'neutral';
+  let maxScore = 0;
+  for (const [emotion, score] of Object.entries(emotionScores)) {
+    if (score > maxScore) {
+      maxScore = score;
+      primaryEmotion = emotion;
+    }
+  }
+
+  // Calculate intensity (1-10)
+  const intensity = Math.min(10, Math.max(1, Math.floor(maxScore / 2) + 1));
+
+  // Find secondary emotions
+  const secondaryEmotions = Object.entries(emotionScores)
+    .filter(([emotion, score]) => score > 0 && emotion !== primaryEmotion)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 2)
+    .map(([emotion]) => emotion);
+
+  return {
+    primary: primaryEmotion,
+    intensity,
+    secondary: secondaryEmotions
+  };
+}
+
+function adaptAIPersonality(userEmotion: { primary: string; intensity: number; secondary: string[] }, userMemory: UserMemory) {
+  const basePersonality = userMemory.aiAdaptation;
+  const adaptation = { ...basePersonality };
+
+  // Adapt based on user's emotional state
+  switch (userEmotion.primary) {
+    case 'happy':
+    case 'excited':
+      adaptation.playfulness = Math.min(1, basePersonality.playfulness + 0.2);
+      adaptation.talkative = Math.min(1, basePersonality.talkative + 0.15);
+      adaptation.romantic = Math.min(1, basePersonality.romantic + 0.1);
+      break;
+    
+    case 'sad':
+    case 'lonely':
+      adaptation.caring = Math.min(1, basePersonality.caring + 0.3);
+      adaptation.romantic = Math.min(1, basePersonality.romantic + 0.25);
+      adaptation.playfulness = Math.max(0.2, basePersonality.playfulness - 0.2);
+      break;
+    
+    case 'stressed':
+    case 'anxious':
+      adaptation.caring = Math.min(1, basePersonality.caring + 0.25);
+      adaptation.talkative = Math.max(0.3, basePersonality.talkative - 0.2);
+      adaptation.playfulness = Math.max(0.1, basePersonality.playfulness - 0.3);
+      break;
+    
+    case 'confident':
+      adaptation.playfulness = Math.min(1, basePersonality.playfulness + 0.15);
+      adaptation.romantic = Math.min(1, basePersonality.romantic + 0.1);
+      adaptation.caring = Math.min(1, basePersonality.caring + 0.1);
+      break;
+  }
+
+  // Gradually return to base personality over time
+  const timeSinceLastAdaptation = Date.now() - basePersonality.lastAdaptation;
+  const hoursSinceAdaptation = timeSinceLastAdaptation / (1000 * 60 * 60);
+  
+  if (hoursSinceAdaptation > 2) { // After 2 hours, start returning to base
+    const returnRate = Math.min(0.1, hoursSinceAdaptation * 0.05);
+    adaptation.playfulness = basePersonality.playfulness + (adaptation.playfulness - basePersonality.playfulness) * (1 - returnRate);
+    adaptation.romantic = basePersonality.romantic + (adaptation.romantic - basePersonality.romantic) * (1 - returnRate);
+    adaptation.talkative = basePersonality.talkative + (adaptation.talkative - basePersonality.talkative) * (1 - returnRate);
+    adaptation.caring = basePersonality.caring + (adaptation.caring - basePersonality.caring) * (1 - returnRate);
+  }
+
+  // Update last adaptation time
+  adaptation.lastAdaptation = Date.now();
+  
+  return adaptation;
+}
+
+function updateEmotionalPatterns(userMemory: UserMemory, userEmotion: { primary: string; intensity: number; secondary: string[] }) {
+  // Update emotional pattern counts
+  if (userEmotion.primary in userMemory.emotionalPatterns) {
+    userMemory.emotionalPatterns[userEmotion.primary as keyof typeof userMemory.emotionalPatterns]++;
+  }
+  
+  // Update AI adaptation
+  userMemory.aiAdaptation = adaptAIPersonality(userEmotion, userMemory);
 }
 
 function updateUserMemory(userMemory: UserMemory, message: string, detectedMood: string): void {
