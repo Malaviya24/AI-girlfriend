@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         `;
 
         const response = await openai.chat.completions.create({
-          model: "gpt-4",
+          model: "gpt-3.5-turbo",  // Use 3.5-turbo for higher rate limits
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: message }
@@ -87,8 +87,17 @@ export async function POST(request: NextRequest) {
           }
         });
       }
-    } catch (openaiError) {
-      console.log('OpenAI not available, trying advanced AI backend:', openaiError);
+    } catch (openaiError: any) {
+      console.log('OpenAI error:', openaiError);
+      
+      // Check if it's a rate limit error
+      if (openaiError?.error?.code === 'rate_limit_exceeded') {
+        console.log('Rate limit reached, waiting before fallback...');
+        // Wait a bit before trying fallback
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      console.log('Trying advanced AI backend as fallback...');
     }
 
     // Try to use advanced AI backend as fallback

@@ -25,5 +25,113 @@
     "mood": "curious",
     "score": 0,
     "createdAt": 1755085499759
+  },
+  {
+    "id": "1755085714524-053ktb",
+    "userId": "default",
+    "text": "Nope",
+    "date": "Wed Aug 13 2025",
+    "mood": "curious",
+    "score": 0,
+    "createdAt": 1755085714524
+  },
+  {
+    "id": "1755085751910-28o2oq",
+    "userId": "default",
+    "text": "You suggested me game",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085751910
+  },
+  {
+    "id": "1755085791123-xy4n1i",
+    "userId": "default",
+    "text": "Can change lang to Gujarati like me english me likhuga pn lang gujarati hogi tu samja jayegi",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0.08,
+    "createdAt": 1755085791123
+  },
+  {
+    "id": "1755085811871-l91hzk",
+    "userId": "default",
+    "text": "Na apde same j topic uper raheshu",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085811871
+  },
+  {
+    "id": "1755085827918-445fjk",
+    "userId": "default",
+    "text": "Ok chalo ramiye",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085827918
+  },
+  {
+    "id": "1755085843127-d3abaj",
+    "userId": "default",
+    "text": "Ha",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085843127
+  },
+  {
+    "id": "1755085850152-gpcczi",
+    "userId": "default",
+    "text": "Ha",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085850152
+  },
+  {
+    "id": "1755085865766-ul4t3c",
+    "userId": "default",
+    "text": "Ha hoi pn sake and no pn hoi sake",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085865766
+  },
+  {
+    "id": "1755085873904-u7hvpf",
+    "userId": "default",
+    "text": "Na",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085873904
+  },
+  {
+    "id": "1755085883723-gfjcj6",
+    "userId": "default",
+    "text": "Na ",
+    "date": "Wed Aug 13 2025",
+    "mood": "playful",
+    "score": 0,
+    "createdAt": 1755085883723
+  },
+  {
+    "id": "1755085891410-gw9u6h",
+    "userId": "default",
+    "text": "Why",
+    "date": "Wed Aug 13 2025",
+    "mood": "curious",
+    "score": 0,
+    "createdAt": 1755085891410
+  },
+  {
+    "id": "1755085916510-d9u5os",
+    "userId": "default",
+    "text": "Ok",
+    "date": "Wed Aug 13 2025",
+    "mood": "curious",
+    "score": 0,
+    "createdAt": 1755085916510
   }
 ]
